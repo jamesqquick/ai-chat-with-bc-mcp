@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useChat } from '@ai-sdk/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, { useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, User, Bot, Loader2 } from 'lucide-react';
-import { ProductList } from '@/vibes/soul/sections/product-list';
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Send, User, Bot, Loader2 } from "lucide-react";
+import { ProductList } from "@/vibes/soul/sections/product-list";
 
 export default function Chat() {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -24,16 +24,17 @@ export default function Chat() {
   console.log(messages);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage({ text: input });
-    setInput('');
+    setInput("");
   };
 
-  const isLoading = status === 'streaming';
+  console.log(status);
+  const isLoading = status === "streaming" || status === "submitted";
 
   return (
     <Card className="w-full max-w-2xl mx-auto h-[600px] flex flex-col overflow-hidden">
@@ -58,16 +59,16 @@ export default function Chat() {
               <div
                 key={message.id}
                 className={`flex gap-3 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                  message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 <div
                   className={`flex gap-3 w-[80%] ${
-                    message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                    message.role === "user" ? "flex-row-reverse" : "flex-row"
                   }`}
                 >
                   <div className="flex-shrink-0">
-                    {message.role === 'user' ? (
+                    {message.role === "user" ? (
                       <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
                         <User className="w-4 h-4 text-primary-foreground" />
                       </div>
@@ -81,14 +82,14 @@ export default function Chat() {
                   <div className={`w-full`}>
                     {message.parts.map((part, i) => {
                       //TODO: check error at part.output.content.isError
-                      if (part.type === 'text') {
-                        console.log('Text part:', part.text);
+                      if (part.type === "text") {
+                        console.log("Text part:", part.text);
                         return (
                           <div
                             className={`rounded-lg px-4 py-2 ${
-                              message.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted'
+                              message.role === "user"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted"
                             }`}
                             key={`${message.id}-${i}`}
                           >
@@ -96,12 +97,12 @@ export default function Chat() {
                           </div>
                         );
                       } else if (
-                        part.type === 'dynamic-tool' &&
-                        part.toolName === 'search_products' &&
+                        part.type === "dynamic-tool" &&
+                        part.toolName === "search_products" &&
                         part.output?.structuredContent?.products
                       ) {
                         console.log(
-                          'Tool part output:',
+                          "Tool part output:",
                           part?.output?.structuredContent
                         );
                         const products =
@@ -109,7 +110,7 @@ export default function Chat() {
                             (product) => ({
                               id: product.entityId,
                               title: product.name,
-                              href: '#',
+                              href: "#",
                               image: {
                                 src: product.defaultImage?.url,
                                 alt: product.name,
@@ -126,23 +127,23 @@ export default function Chat() {
                           />
                         );
                       } else if (
-                        part.type === 'dynamic-tool' &&
-                        part.toolName === 'add_item_to_cart'
+                        part.type === "dynamic-tool" &&
+                        part.toolName === "add_item_to_cart"
                       ) {
-                        console.log('Add to cart tool part output:');
+                        console.log("Add to cart tool part output:");
 
                         return (
                           <div key={`${message.id}-${i}`}>
                             Successfully added item(s) to your cart. Your cart
-                            id is{' '}
+                            id is{" "}
                             {part.output?.structuredContent?.cart?.entityId}
                           </div>
                         );
                       } else if (
-                        part.type === 'dynamic-tool' &&
-                        part.toolName === 'create_checkout_url'
+                        part.type === "dynamic-tool" &&
+                        part.toolName === "create_checkout_url"
                       ) {
-                        console.log('Create checkout URL tool part output:');
+                        console.log("Create checkout URL tool part output:");
 
                         return (
                           <div key={`${message.id}-${i}`}>

@@ -1,24 +1,23 @@
-import { openai } from '@ai-sdk/openai';
+import { openai } from "@ai-sdk/openai";
 import {
   convertToModelMessages,
   experimental_createMCPClient,
   streamText,
   UIMessage,
-} from 'ai';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio';
+} from "ai";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
+  if (!process.env.MCP_SERVER_URL) {
+    return new Response("MCP_SERVER_URL is not set", { status: 500 });
+  }
+
   try {
-    // Initialize an MCP client to connect to a `stdio` MCP server:
-    const transport = new StdioClientTransport({
-      command: 'npx',
-      args: [
-        'mcp-remote',
-        'https://store-g6lsxzp4eh-1782588.mybigcommerce.com/api/mcp',
-      ],
-    });
+    const transport = new StreamableHTTPClientTransport(
+      new URL(process.env.MCP_SERVER_URL)
+    );
 
     const stdioClient = await experimental_createMCPClient({
       transport,
@@ -27,19 +26,18 @@ export async function POST(req: Request) {
     const tools = await stdioClient.tools();
 
     const result = streamText({
-      model: openai('gpt-4.1-mini'),
+      model: openai("gpt-4.1-mini"),
       messages: convertToModelMessages(messages),
       tools,
       onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
-        // your own logic, e.g. for saving the chat history or recording usage
         console.log(text, toolCalls, toolResults, finishReason, usage);
       },
     });
 
     return result.toUIMessageStreamResponse();
   } catch (error) {
-    console.error('Error in POST /api/chat:', error);
-    return new Response('Internal Server Error', { status: 500 });
+    console.error("Error in POST /api/chat:", error);
+    return new Response("Internal Server Error", { status: 500 });
   }
 }
 
