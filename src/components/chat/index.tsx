@@ -15,6 +15,42 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Loader2 } from "lucide-react";
 import { ProductList } from "@/vibes/soul/sections/product-list";
 
+// TypeScript types for message parts
+type TextPart = {
+  type: "text";
+  text: string;
+};
+
+type Product = {
+  entityId: string;
+  name: string;
+  defaultImage?: {
+    url: string;
+  };
+};
+
+type Cart = {
+  entityId: string;
+};
+
+type ToolOutput = {
+  structuredContent?: {
+    products?: Product[];
+    cart?: Cart;
+  };
+  content?: {
+    isError?: boolean;
+  };
+};
+
+type DynamicToolPart = {
+  type: "dynamic-tool";
+  toolName: string;
+  output?: ToolOutput;
+};
+
+type MessagePart = TextPart | DynamicToolPart;
+
 export default function Chat() {
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat();
@@ -80,8 +116,9 @@ export default function Chat() {
                   </div>
 
                   <div className={`w-full`}>
-                    {message.parts.map((part, i) => {
-                      //TODO: check error at part.output.content.isError
+                    {message.parts.map((partRaw, i) => {
+                      const part = partRaw as MessagePart;
+                      //TODO: check error at part.output?.content?.isError
                       if (part.type === "text") {
                         console.log("Text part:", part.text);
                         return (
@@ -112,7 +149,7 @@ export default function Chat() {
                               title: product.name,
                               href: "#",
                               image: {
-                                src: product.defaultImage?.url,
+                                src: product.defaultImage?.url || "",
                                 alt: product.name,
                               },
                             })
