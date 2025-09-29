@@ -31,8 +31,6 @@ async function getClient() {
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
-  console.log('###', req.headers);
-
   try {
     const client = await getClient();
 
