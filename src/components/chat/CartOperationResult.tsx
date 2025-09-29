@@ -16,7 +16,6 @@ export function CartOperationResult({
   partIndex,
   cart,
 }: CartOperationResultProps) {
-  // Handle successful cart operation
   if (cart?.entityId) {
     return (
       <div
@@ -38,7 +37,6 @@ export function CartOperationResult({
     );
   }
 
-  // Handle failed cart operation
   return (
     <div
       key={`${messageId}-${partIndex}`}

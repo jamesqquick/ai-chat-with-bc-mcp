@@ -22,7 +22,6 @@ export default function Chat() {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Reset dismissed error when a new error occurs
   useEffect(() => {
     if (error) {
       setDismissedError(false);
@@ -83,7 +82,7 @@ export default function Chat() {
               </div>
             )}
 
-            {messages.map((message) => (
+            {messages.map((message, i) => (
               <div
                 key={message.id}
                 className={`flex gap-3 ${
@@ -96,26 +95,32 @@ export default function Chat() {
                   }`}
                 >
                   <div className="flex-shrink-0">
-                    {message.role === "user" ? (
-                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.role === "user" ? "bg-primary" : "bg-secondary"
+                      }`}
+                    >
+                      {message.role === "user" ? (
                         <User className="w-4 h-4 text-primary-foreground" />
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                      ) : (
                         <Bot className="w-4 h-4 text-secondary-foreground" />
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
                   <div className={`w-full`}>
-                    {message.parts.map((part, i) => {
-                      if (i === message.parts.length - 1) {
+                    {message.parts.map((part, j) => {
+                      if (j === message.parts.length - 1) {
                         console.log(part);
+
+                        if (i === messages.length - 1 && isLoading) {
+                          return;
+                        }
                       }
 
                       return (
                         <MessageRenderer
-                          key={`${message.id}-${i}`}
+                          key={`${message.id}-${j}`}
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           part={part as any}
                           messageId={message.id}

@@ -20,11 +20,11 @@ export async function POST(req: Request) {
       new URL(process.env.MCP_SERVER_URL)
     );
 
-    const stdioClient = await experimental_createMCPClient({
+    const mcpClient = await experimental_createMCPClient({
       transport,
     });
 
-    const tools = await stdioClient.tools();
+    const tools = await mcpClient.tools();
 
     const result = streamText({
       model: openai("gpt-4.1-mini"),

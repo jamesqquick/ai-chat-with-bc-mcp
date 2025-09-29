@@ -20,7 +20,6 @@ export function MessageRenderer({
   partIndex,
   isUser,
 }: MessageRendererProps) {
-  // Check for tool execution errors first
   if (part.type === "dynamic-tool" && part.output?.isError) {
     return (
       <ToolErrorResult
@@ -31,7 +30,6 @@ export function MessageRenderer({
     );
   }
 
-  // Handle text messages
   if (part.type === "text") {
     return (
       <TextMessage
@@ -87,23 +85,4 @@ export function MessageRenderer({
         );
     }
   }
-
-  //   return (
-  //     <div
-  //       key={`${messageId}-${partIndex}`}
-  //       className="rounded-lg px-4 py-3 bg-orange-50 border border-orange-200"
-  //     >
-  //       <div className="flex items-start gap-3">
-  //         <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-  //         <div>
-  //           <p className="text-sm font-medium text-orange-800">
-  //             Unknown Message Type: {part.type}
-  //           </p>
-  //           <p className="text-sm text-orange-700 mt-1">
-  //             This message type is not yet supported.
-  //           </p>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
 }
