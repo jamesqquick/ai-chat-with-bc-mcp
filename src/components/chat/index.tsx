@@ -12,50 +12,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, User, Bot, Loader2 } from "lucide-react";
-import { ProductList } from "@/vibes/soul/sections/product-list";
-
-// TypeScript types for message parts
-type TextPart = {
-  type: "text";
-  text: string;
-};
-
-type Product = {
-  entityId: string;
-  name: string;
-  defaultImage?: {
-    url: string;
-  };
-};
-
-type Cart = {
-  entityId: string;
-};
-
-type ToolOutput = {
-  structuredContent?: {
-    products?: Product[];
-    cart?: Cart;
-  };
-  content?: {
-    isError?: boolean;
-  };
-};
-
-type DynamicToolPart = {
-  type: "dynamic-tool";
-  toolName: string;
-  output?: ToolOutput;
-};
-
-type MessagePart = TextPart | DynamicToolPart;
+import { Send, User, Bot, Loader2, AlertTriangle, X } from "lucide-react";
+import { MessageRenderer } from "./MessageRenderer";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status } = useChat();
+  const [dismissedError, setDismissedError] = useState(false);
+  const { messages, sendMessage, status, error } = useChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Reset dismissed error when a new error occurs
+  useEffect(() => {
+    if (error) {
+      setDismissedError(false);
+    }
+  }, [error]);
 
   console.log(messages);
 
@@ -80,6 +52,26 @@ export default function Chat() {
           AI Chat Assistant
         </CardTitle>
       </CardHeader>
+
+      {/* Global Error Alert */}
+      {error && !dismissedError && (
+        <div className="mx-4 mb-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-red-800">Chat Error</p>
+            <p className="text-sm text-red-700 mt-1">
+              {error.message ||
+                "An unexpected error occurred. Please try again."}
+            </p>
+          </div>
+          <button
+            onClick={() => setDismissedError(true)}
+            className="flex-shrink-0 text-red-400 hover:text-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea ref={scrollAreaRef} className="h-full px-4">
@@ -116,78 +108,21 @@ export default function Chat() {
                   </div>
 
                   <div className={`w-full`}>
-                    {message.parts.map((partRaw, i) => {
-                      const part = partRaw as MessagePart;
-                      //TODO: check error at part.output?.content?.isError
-                      if (part.type === "text") {
-                        console.log("Text part:", part.text);
-                        return (
-                          <div
-                            className={`rounded-lg px-4 py-2 ${
-                              message.role === "user"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
-                            }`}
-                            key={`${message.id}-${i}`}
-                          >
-                            {part.text}
-                          </div>
-                        );
-                      } else if (
-                        part.type === "dynamic-tool" &&
-                        part.toolName === "search_products" &&
-                        part.output?.structuredContent?.products
-                      ) {
-                        console.log(
-                          "Tool part output:",
-                          part?.output?.structuredContent
-                        );
-                        const products =
-                          part?.output?.structuredContent?.products?.map(
-                            (product) => ({
-                              id: product.entityId,
-                              title: product.name,
-                              href: "#",
-                              image: {
-                                src: product.defaultImage?.url || "",
-                                alt: product.name,
-                              },
-                            })
-                          );
-                        console.log(products);
-
-                        return (
-                          <ProductList
-                            key={`${message.id}-${i}`}
-                            products={products}
-                            showCompare={false}
-                          />
-                        );
-                      } else if (
-                        part.type === "dynamic-tool" &&
-                        part.toolName === "add_item_to_cart"
-                      ) {
-                        console.log("Add to cart tool part output:");
-
-                        return (
-                          <div key={`${message.id}-${i}`}>
-                            Successfully added item(s) to your cart. Your cart
-                            id is{" "}
-                            {part.output?.structuredContent?.cart?.entityId}
-                          </div>
-                        );
-                      } else if (
-                        part.type === "dynamic-tool" &&
-                        part.toolName === "create_checkout_url"
-                      ) {
-                        console.log("Create checkout URL tool part output:");
-
-                        return (
-                          <div key={`${message.id}-${i}`}>
-                            Generated a checkout URL
-                          </div>
-                        );
+                    {message.parts.map((part, i) => {
+                      if (i === message.parts.length - 1) {
+                        console.log(part);
                       }
+
+                      return (
+                        <MessageRenderer
+                          key={`${message.id}-${i}`}
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          part={part as any}
+                          messageId={message.id}
+                          partIndex={i}
+                          isUser={message.role === "user"}
+                        />
+                      );
                     })}
                   </div>
                 </div>
@@ -225,12 +160,19 @@ export default function Chat() {
           <Input
             value={input}
             onChange={(e) => setInput(e.currentTarget.value)}
-            placeholder="Type your message..."
-            disabled={isLoading}
+            placeholder={
+              error && !dismissedError
+                ? "Fix the error above before continuing..."
+                : "Type your message..."
+            }
+            disabled={isLoading || (error && !dismissedError)}
             className="flex-1"
             autoFocus
           />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
+          <Button
+            type="submit"
+            disabled={isLoading || !input.trim() || (error && !dismissedError)}
+          >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
