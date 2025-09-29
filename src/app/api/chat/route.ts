@@ -11,6 +11,7 @@ export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   if (!process.env.MCP_SERVER_URL) {
+    console.error("MCP_SERVER_URL is not set");
     return new Response("MCP_SERVER_URL is not set", { status: 500 });
   }
 
