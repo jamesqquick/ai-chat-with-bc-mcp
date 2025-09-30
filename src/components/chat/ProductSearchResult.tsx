@@ -11,16 +11,10 @@ type Product = {
 };
 
 type ProductSearchResultProps = {
-  messageId: string;
-  partIndex: number;
   products?: Product[];
 };
 
-export function ProductSearchResult({
-  messageId,
-  partIndex,
-  products,
-}: ProductSearchResultProps) {
+export function ProductSearchResult({ products }: ProductSearchResultProps) {
   // Handle case where products exist
   if (products && products.length > 0) {
     const formattedProducts = products.map((product) => ({
@@ -33,21 +27,12 @@ export function ProductSearchResult({
       },
     }));
 
-    return (
-      <ProductList
-        key={`${messageId}-${partIndex}`}
-        products={formattedProducts}
-        showCompare={false}
-      />
-    );
+    return <ProductList products={formattedProducts} showCompare={false} />;
   }
 
   // Handle case where no products found
   return (
-    <div
-      key={`${messageId}-${partIndex}`}
-      className="rounded-lg px-4 py-3 bg-yellow-50 border border-yellow-200"
-    >
+    <div className="rounded-lg px-4 py-3 bg-yellow-50 border border-yellow-200">
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
         <div>

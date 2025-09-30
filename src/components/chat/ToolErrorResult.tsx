@@ -2,21 +2,12 @@ import React from "react";
 import { AlertTriangle } from "lucide-react";
 
 type ToolErrorResultProps = {
-  messageId: string;
-  partIndex: number;
   toolName: string;
 };
 
-export function ToolErrorResult({
-  messageId,
-  partIndex,
-  toolName,
-}: ToolErrorResultProps) {
+export function ToolErrorResult({ toolName }: ToolErrorResultProps) {
   return (
-    <div
-      key={`${messageId}-${partIndex}`}
-      className="rounded-lg px-4 py-3 bg-red-50 border border-red-200"
-    >
+    <div className="rounded-lg px-4 py-3 bg-red-50 border border-red-200">
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
         <div>

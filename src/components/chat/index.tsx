@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,23 +13,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, User, Bot, Loader2, AlertTriangle, X } from "lucide-react";
+import { Send, User, Bot, Loader2 } from "lucide-react";
 import { MessageRenderer } from "./MessageRenderer";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const [dismissedError, setDismissedError] = useState(false);
   const { messages, sendMessage, status, error } = useChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (error) {
-      setDismissedError(false);
+      toast.error("An unexpected error occurred. Please try again.");
     }
   }, [error]);
-
-  console.log(messages);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,7 +38,6 @@ export default function Chat() {
     setInput("");
   };
 
-  console.log(status);
   const isLoading = status === "streaming" || status === "submitted";
 
   return (
@@ -51,26 +48,6 @@ export default function Chat() {
           AI Chat Assistant
         </CardTitle>
       </CardHeader>
-
-      {/* Global Error Alert */}
-      {error && !dismissedError && (
-        <div className="mx-4 mb-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-red-800">Chat Error</p>
-            <p className="text-sm text-red-700 mt-1">
-              {error.message ||
-                "An unexpected error occurred. Please try again."}
-            </p>
-          </div>
-          <button
-            onClick={() => setDismissedError(true)}
-            className="flex-shrink-0 text-red-400 hover:text-red-600"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
 
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea ref={scrollAreaRef} className="h-full px-4">
@@ -119,14 +96,13 @@ export default function Chat() {
                       }
 
                       return (
-                        <MessageRenderer
-                          key={`${message.id}-${j}`}
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          part={part as any}
-                          messageId={message.id}
-                          partIndex={i}
-                          isUser={message.role === "user"}
-                        />
+                        <div key={`${message.id}-${j}`}>
+                          <MessageRenderer
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            part={part as any}
+                            isUser={message.role === "user"}
+                          />
+                        </div>
                       );
                     })}
                   </div>
@@ -165,19 +141,12 @@ export default function Chat() {
           <Input
             value={input}
             onChange={(e) => setInput(e.currentTarget.value)}
-            placeholder={
-              error && !dismissedError
-                ? "Fix the error above before continuing..."
-                : "Type your message..."
-            }
-            disabled={isLoading || (error && !dismissedError)}
+            placeholder="Type your message..."
+            disabled={isLoading}
             className="flex-1"
             autoFocus
           />
-          <Button
-            type="submit"
-            disabled={isLoading || !input.trim() || (error && !dismissedError)}
-          >
+          <Button type="submit" disabled={isLoading || !input.trim()}>
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
