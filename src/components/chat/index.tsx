@@ -41,7 +41,7 @@ export default function Chat() {
   const isLoading = status === "streaming" || status === "submitted";
 
   return (
-    <Card className="w-full max-w-2xl mx-auto h-[600px] flex flex-col overflow-hidden">
+    <Card className="w-full h-[600px] flex flex-col overflow-hidden">
       <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2">
           <Bot className="w-5 h-5" />

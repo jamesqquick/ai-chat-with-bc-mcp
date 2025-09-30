@@ -31,7 +31,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${body.variable} ${heading.variable} ${mono.variable}`}>
-        <NuqsAdapter>{children}</NuqsAdapter>
+        <NuqsAdapter>
+          <div className="max-w-4xl mx-auto px-4">{children}</div>
+        </NuqsAdapter>
         <Toaster
           position="top-right"
           toastOptions={{
@@ -42,13 +44,13 @@ export default function RootLayout({
             },
             error: {
               style: {
-                background: "#fef2f2", // red-50
-                color: "#991b1b", // red-800
-                border: "1px solid #fecaca", // red-200
+                background: "#fef2f2",
+                color: "#991b1b",
+                border: "1px solid #fecaca",
               },
               iconTheme: {
-                primary: "#dc2626", // red-600
-                secondary: "#fef2f2", // red-50
+                primary: "#dc2626",
+                secondary: "#fef2f2",
               },
             },
           }}
