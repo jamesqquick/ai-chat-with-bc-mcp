@@ -8,7 +8,7 @@ import { FallbackToolResult } from "./FallbackToolResult";
 
 type MessageRendererProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  part: any; // Using any to be compatible with AI SDK's UIMessagePart types
+  part: any;
   isUser: boolean;
 };
 

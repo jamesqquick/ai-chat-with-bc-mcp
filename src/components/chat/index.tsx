@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useChat } from "@ai-sdk/react";
+import { UIMessage, useChat } from "@ai-sdk/react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,10 @@ import { MessageRenderer } from "./MessageRenderer";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status, error } = useChat();
+  //TODO: implement useChat hook for error, messages, and status
+  const error = null;
+  const messages: UIMessage[] = [];
+  const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -30,18 +33,17 @@ export default function Chat() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    console.log("use effect");
   }, [messages]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendMessage({ text: input });
     setInput("");
+    setIsLoading(true);
   };
 
-  const isLoading = status === "streaming" || status === "submitted";
-
   return (
-    <Card className="w-full max-w-2xl mx-auto h-[600px] flex flex-col overflow-hidden">
+    <Card className="w-full mx-auto h-[600px] flex flex-col overflow-hidden">
       <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
@@ -58,57 +60,7 @@ export default function Chat() {
                 <p>Start a conversation by typing a message below!</p>
               </div>
             )}
-
-            {messages.map((message, i) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`flex gap-3 w-[80%] ${
-                    message.role === "user" ? "flex-row-reverse" : "flex-row"
-                  }`}
-                >
-                  <div className="flex-shrink-0">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        message.role === "user" ? "bg-primary" : "bg-secondary"
-                      }`}
-                    >
-                      {message.role === "user" ? (
-                        <User className="w-4 h-4 text-primary-foreground" />
-                      ) : (
-                        <Bot className="w-4 h-4 text-secondary-foreground" />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={`w-full`}>
-                    {message.parts.map((part, j) => {
-                      if (j === message.parts.length - 1) {
-                        console.log(part);
-
-                        if (i === messages.length - 1 && isLoading) {
-                          return;
-                        }
-                      }
-
-                      return (
-                        <div key={`${message.id}-${j}`}>
-                          <MessageRenderer
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            part={part as any}
-                            isUser={message.role === "user"}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ))}
+            {/* TODO: implement show messages */}
 
             {isLoading && (
               <div className="flex gap-3 justify-start">
