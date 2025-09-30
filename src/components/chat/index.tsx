@@ -15,6 +15,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Loader2 } from "lucide-react";
 import { MessageRenderer } from "./MessageRenderer";
+import { UserMessage } from "./UserMessage";
+import { BotMessage } from "./BotMessage";
 
 export default function Chat() {
   const [input, setInput] = useState("");
@@ -59,76 +61,49 @@ export default function Chat() {
               </div>
             )}
 
-            {messages.map((message, i) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`flex gap-3 w-[80%] ${
-                    message.role === "user" ? "flex-row-reverse" : "flex-row"
-                  }`}
-                >
-                  <div className="flex-shrink-0">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        message.role === "user" ? "bg-primary" : "bg-secondary"
-                      }`}
-                    >
-                      {message.role === "user" ? (
-                        <User className="w-4 h-4 text-primary-foreground" />
-                      ) : (
-                        <Bot className="w-4 h-4 text-secondary-foreground" />
-                      )}
-                    </div>
+            {messages.map((message, i) => {
+              const messageContent = message.parts.map((part, j) => {
+                if (j === message.parts.length - 1) {
+                  console.log(part);
+
+                  if (
+                    i === messages.length - 1 &&
+                    isLoading &&
+                    message.role !== "user"
+                  ) {
+                    return null;
+                  }
+                }
+
+                return (
+                  <div key={`${message.id}-${j}`}>
+                    <MessageRenderer
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      part={part as any}
+                      isUser={message.role === "user"}
+                    />
                   </div>
+                );
+              });
 
-                  <div className={`w-full`}>
-                    {message.parts.map((part, j) => {
-                      if (j === message.parts.length - 1) {
-                        console.log(part);
-
-                        if (i === messages.length - 1 && isLoading) {
-                          return;
-                        }
-                      }
-
-                      return (
-                        <div key={`${message.id}-${j}`}>
-                          <MessageRenderer
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            part={part as any}
-                            isUser={message.role === "user"}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ))}
+              return message.role === "user" ? (
+                <UserMessage key={message.id}>{messageContent}</UserMessage>
+              ) : (
+                <BotMessage key={message.id}>{messageContent}</BotMessage>
+              );
+            })}
 
             {isLoading && (
-              <div className="flex gap-3 justify-start">
-                <div className="flex gap-3 max-w-[80%]">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-secondary-foreground" />
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg px-4 py-2 bg-muted">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm text-muted-foreground">
-                        Thinking...
-                      </span>
-                    </div>
+              <BotMessage>
+                <div className="rounded-lg px-4 py-2 bg-muted">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">
+                      Thinking...
+                    </span>
                   </div>
                 </div>
-              </div>
+              </BotMessage>
             )}
 
             <div ref={messagesEndRef} />
