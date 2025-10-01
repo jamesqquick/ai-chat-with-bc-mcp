@@ -18,9 +18,7 @@ export async function POST(req: Request) {
       model: openai("gpt-4.1-mini"),
       messages: convertToModelMessages(messages),
       tools,
-      onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
-        console.log(text, toolCalls, toolResults, finishReason, usage);
-      },
+      onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {},
     });
 
     const response = result.toUIMessageStreamResponse();
