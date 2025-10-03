@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 //TODO: import useChat from "ai-sdk/react"
-import { UIMessage } from "@ai-sdk/react";
+import { UIMessage, useChat } from "@ai-sdk/react";
 
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   //TODO use useChat hook instead of these hard-coded values
+  //const { messages, sendMessage, status, error } = useChat();
   const error = null;
   const messages: UIMessage[] = [];
   const isLoading = false;
@@ -51,6 +52,7 @@ export default function Chat() {
     e.preventDefault();
     setInput("");
     //TODO send message using sendMessage from useChat hook
+    //sendMessage({ text: input });
   };
 
   return (
@@ -66,6 +68,7 @@ export default function Chat() {
         <ScrollArea ref={scrollAreaRef} className="h-full px-4">
           <div className="space-y-4 py-4">
             {/* TODO: render messages using the <MessageRenderer> component */}
+            {/* <MessageRenderer messages={messages} isLoading={isLoading} /> */}
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
