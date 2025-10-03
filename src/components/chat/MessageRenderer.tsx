@@ -1,55 +1,75 @@
 import React from "react";
-import { ProductSearchResult } from "./ProductSearchResult";
-import { CartOperationResult } from "./CartOperationResult";
-import { CheckoutResult } from "./CheckoutResult";
-import { ToolErrorResult } from "./ToolErrorResult";
-import { TextMessage } from "./TextMessage";
-import { FallbackToolResult } from "./FallbackToolResult";
+import { UserMessage } from "./UserMessage";
+import { BotMessage } from "./BotMessage";
+import { UIMessage } from "@ai-sdk/react";
+import { Bot, Loader2 } from "lucide-react";
 
 type MessageRendererProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  part: any; // Using any to be compatible with AI SDK's UIMessagePart types
-  isUser: boolean;
+  messages: UIMessage[];
+  isLoading?: boolean;
 };
 
-export function MessageRenderer({ part, isUser }: MessageRendererProps) {
-  if (part.type === "dynamic-tool" && part.output?.isError) {
-    return <ToolErrorResult toolName={part.toolName} />;
-  }
-
-  if (part.type === "text") {
-    return <TextMessage text={part.text} isUser={isUser} />;
-  }
-
-  if (part.type === "reasoning") {
+export function MessageRenderer({
+  messages,
+  isLoading = false,
+}: MessageRendererProps) {
+  if (messages.length === 0) {
     return (
-      <TextMessage text={`🤔 Reasoning: ${part.reasoning}`} isUser={false} />
+      <div className="text-center text-muted-foreground py-8">
+        <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
+        <p>Start a conversation by typing a message below!</p>
+      </div>
     );
   }
 
-  if (part.type === "dynamic-tool") {
-    switch (part.toolName) {
-      case "search_products":
-        return (
-          <ProductSearchResult
-            products={part.output?.structuredContent?.products}
-          />
-        );
+  return (
+    <>
+      {messages.map((message, messageIndex) => {
+        // Skip the last message if it's from the bot and we're loading
+        if (
+          messageIndex === messages.length - 1 &&
+          isLoading &&
+          message.role !== "user"
+        ) {
+          return null;
+        }
 
-      case "add_item_to_cart":
-        return (
-          <CartOperationResult cart={part.output?.structuredContent?.cart} />
-        );
+        return message.parts.map((part: any, partIndex: number) => {
+          if (message.role === "user") {
+            return (
+              <UserMessage key={`${message.id}-${partIndex}`} part={part} />
+            );
+          } else {
+            return (
+              <BotMessage key={`${message.id}-${partIndex}`} part={part} />
+            );
+          }
+        });
+      })}
 
-      case "create_checkout_url":
-        return (
-          <CheckoutResult
-            checkoutURL={part.output?.structuredContent?.checkoutURL}
-          />
-        );
-
-      default:
-        return <FallbackToolResult toolName={part.toolName} />;
-    }
-  }
+      {isLoading && (
+        <div className="flex gap-3 justify-start">
+          <div className="flex gap-3 w-[80%] flex-row">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                <Bot className="w-4 h-4 text-secondary-foreground" />
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="space-y-2">
+                <div className="rounded-lg px-4 py-2 bg-muted">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">
+                      Thinking...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
